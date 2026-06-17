@@ -1,1 +1,6 @@
 *bin/
+*/zed/target
+*.wasm
+*.o
+rune
+rune-lsp
