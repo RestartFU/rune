@@ -16,9 +16,9 @@ func TestOutputPathFor(t *testing.T) {
 		outputDir string
 		out       string
 	}{
-		{name: "ru extension", in: "/tmp/example/example.ru", outputDir: "/tmp/example", out: "/tmp/example/example_rune.go"},
+		{name: "ru extension", in: "/tmp/example/example.rn", outputDir: "/tmp/example", out: "/tmp/example/example_rune.go"},
 		{name: "path without extension", in: "/tmp/example/example", outputDir: "/tmp/example", out: "/tmp/example/example_rune.go"},
-		{name: "custom target dir", in: "/tmp/example/example.ru", outputDir: "/tmp/example/target", out: "/tmp/example/target/example_rune.go"},
+		{name: "custom target dir", in: "/tmp/example/example.rn", outputDir: "/tmp/example/target", out: "/tmp/example/target/example_rune.go"},
 	}
 
 	for _, tc := range tests {
@@ -31,17 +31,17 @@ func TestOutputPathFor(t *testing.T) {
 }
 
 func TestOutputPathForInTarget(t *testing.T) {
-	got := OutputPathForInTarget("/tmp/example/example.ru")
-	want := filepath.Join(filepath.Dir("/tmp/example/example.ru"), "target", "example_rune.go")
+	got := OutputPathForInTarget("/tmp/example/example.rn")
+	want := filepath.Join(filepath.Dir("/tmp/example/example.rn"), "target", "example_rune.go")
 	if got != want {
-		t.Fatalf("OutputPathForInTarget(%q) = %q, want %q", "/tmp/example/example.ru", got, want)
+		t.Fatalf("OutputPathForInTarget(%q) = %q, want %q", "/tmp/example/example.rn", got, want)
 	}
 }
 
 func TestFileInTargetWithEnums_RewritesAcrossFiles(t *testing.T) {
 	tmp := t.TempDir()
-	srcPath := filepath.Join(tmp, "main.ru")
-	enumPath := filepath.Join(tmp, "enum.ru")
+	srcPath := filepath.Join(tmp, "main.rn")
+	enumPath := filepath.Join(tmp, "enum.rn")
 
 	if err := os.WriteFile(enumPath, []byte(`package examples
 
@@ -97,7 +97,7 @@ func TestFile_Table(t *testing.T) {
 		{
 			name:       "generates sibling file",
 			input:      "package examples\ntype Example enum { Allow, Deny { Reason string } }",
-			sourcePath: "examples/input.ru",
+			sourcePath: "examples/input.rn",
 		},
 		{
 			name: "keeps go code and inserts enums",
@@ -111,18 +111,18 @@ type Example enum {
 }
 
 func NewExample() Example { return nil }`,
-			sourcePath: "examples/mixed.ru",
+			sourcePath: "examples/mixed.rn",
 		},
 		{
 			name:        "returns parse error",
 			input:       "type Example enum { Allow }",
-			sourcePath:  "examples/bad.ru",
+			sourcePath:  "examples/bad.rn",
 			errContains: "expected 'package' declaration",
 		},
 		{
 			name:       "keeps go code without enums",
 			input:      "package examples\n\nfunc main() {}",
-			sourcePath: "examples/main.ru",
+			sourcePath: "examples/main.rn",
 		},
 	}
 

@@ -20,7 +20,7 @@ func TestGenerate_Table(t *testing.T) {
 	tests := []testCase{
 		{
 			name: "single enum with fields",
-			path: "examples/enum.ru",
+			path: "examples/enum.rn",
 			input: &parser.File{
 				PackageName: "examples",
 				Enums: []parser.Enum{
@@ -39,7 +39,7 @@ func TestGenerate_Table(t *testing.T) {
 		},
 		{
 			name: "multiple variants no fields",
-			path: "nested/example.ru",
+			path: "nested/example.rn",
 			input: &parser.File{
 				PackageName: "core",
 				Enums: []parser.Enum{
@@ -55,7 +55,7 @@ func TestGenerate_Table(t *testing.T) {
 		},
 		{
 			name: "rewrites enum-qualified variant literals",
-			path: "examples/enum.ru",
+			path: "examples/enum.rn",
 			input: &parser.File{
 				PackageName: "examples",
 				Enums: []parser.Enum{
@@ -78,7 +78,7 @@ func TestGenerate_Table(t *testing.T) {
 		},
 		{
 			name: "rewrites expression switch on enum into type switch",
-			path: "examples/enum.ru",
+			path: "examples/enum.rn",
 			input: &parser.File{
 				PackageName: "examples",
 				Enums: []parser.Enum{
@@ -98,7 +98,7 @@ func TestGenerate_Table(t *testing.T) {
 		},
 		{
 			name: "rewrites rune bound switch variable syntax",
-			path: "examples/main.ru",
+			path: "examples/main.rn",
 			input: &parser.File{
 				PackageName: "main",
 				Enums: []parser.Enum{
@@ -118,7 +118,7 @@ func TestGenerate_Table(t *testing.T) {
 		},
 		{
 			name: "errors on explicit type switch syntax",
-			path: "examples/enum.ru",
+			path: "examples/enum.rn",
 			input: &parser.File{
 				PackageName: "examples",
 				Enums: []parser.Enum{
@@ -139,7 +139,7 @@ func TestGenerate_Table(t *testing.T) {
 		},
 		{
 			name: "rewrites bare enum variant in typed switch cases",
-			path: "examples/enum.ru",
+			path: "examples/enum.rn",
 			input: &parser.File{
 				PackageName: "examples",
 				Enums: []parser.Enum{
@@ -156,7 +156,7 @@ func TestGenerate_Table(t *testing.T) {
 		},
 		{
 			name: "rewrites enum-qualified type assertions",
-			path: "examples/enum.ru",
+			path: "examples/enum.rn",
 			input: &parser.File{
 				PackageName: "examples",
 				Enums: []parser.Enum{
@@ -176,7 +176,7 @@ func TestGenerate_Table(t *testing.T) {
 		},
 		{
 			name: "rewrites bare enum variant in slice of known enum",
-			path: "examples/main.ru",
+			path: "examples/main.rn",
 			input: &parser.File{
 				PackageName: "main",
 				Enums: []parser.Enum{
@@ -195,7 +195,7 @@ func TestGenerate_Table(t *testing.T) {
 		},
 		{
 			name: "rewrites bare enum variant in map value with known type",
-			path: "examples/main.ru",
+			path: "examples/main.rn",
 			input: &parser.File{
 				PackageName: "main",
 				Enums: []parser.Enum{

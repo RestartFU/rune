@@ -23,6 +23,7 @@ const (
 	generateTargetDir
 	generateTargetRecursive
 )
+const runeFileExt = ".rn"
 
 func main() {
 	if len(os.Args) < 2 {
@@ -72,7 +73,7 @@ func usage() {
 	fmt.Println("  run        generate then go build and run (generated in target/)")
 	fmt.Println("  build      generate then go build (generated in target/, binary in target/bin/)")
 	fmt.Println("targets:")
-	fmt.Println("  path/to/file.ru")
+	fmt.Println("  path/to/file.rn")
 	fmt.Println("  path/to/dir")
 	fmt.Println("  ./...")
 	fmt.Println("build options:")
@@ -99,28 +100,40 @@ func runCommand(args []string) error {
 		return err
 	}
 
+	sourceDir := ""
 	var generatedPaths []string
 	switch targetInfo.kind {
 	case generateTargetFile:
+		sourceDir = filepath.Dir(targetPath)
+		if err := clearStaleRunGeneratedFiles(sourceDir); err != nil {
+			return err
+		}
 		allEnums, err := collectEnumsFromRuFiles(filepath.Dir(targetPath))
 		if err != nil {
 			return err
 		}
-		generatedPaths, err = generateDirInTarget(filepath.Dir(targetPath), allEnums)
+		generatedPaths, err = generateDirInTarget(sourceDir, allEnums)
 		if err != nil {
 			return err
 		}
 	case generateTargetDir:
+		sourceDir = targetPath
+		if err := clearStaleRunGeneratedFiles(sourceDir); err != nil {
+			return err
+		}
 		allEnums, err := collectEnumsFromRuFiles(targetPath)
 		if err != nil {
 			return err
 		}
-		generatedPaths, err = generateDirInTarget(targetPath, allEnums)
+		generatedPaths, err = generateDirInTarget(sourceDir, allEnums)
 		if err != nil {
 			return err
 		}
 	default:
-		return fmt.Errorf("run supports only .ru file or directory targets")
+		return fmt.Errorf("run supports only .rn file or directory targets")
+	}
+	if sourceDir == "" {
+		return fmt.Errorf("run command missing source directory")
 	}
 
 	if len(generatedPaths) == 0 {
@@ -172,7 +185,7 @@ func buildCommand(args []string) error {
 		return err
 	}
 	if targetInfo.kind != generateTargetFile {
-		return fmt.Errorf("build supports only a single .ru file target")
+		return fmt.Errorf("build supports only a single .rn file target")
 	}
 
 	allEnums, err := collectEnumsFromRuFiles(filepath.Dir(targetPath))
@@ -226,7 +239,7 @@ func generateDirInTarget(path string, allEnums []parser.Enum) ([]string, error) 
 		}
 
 		entryPath := filepath.Join(path, entry.Name())
-		if filepath.Ext(entryPath) != ".ru" {
+		if filepath.Ext(entryPath) != runeFileExt {
 			continue
 		}
 
@@ -238,6 +251,31 @@ func generateDirInTarget(path string, allEnums []parser.Enum) ([]string, error) 
 	}
 
 	return generatedPaths, nil
+}
+
+func clearStaleRunGeneratedFiles(sourceDir string) error {
+	targetDir := filepath.Join(sourceDir, "target")
+	entries, err := os.ReadDir(targetDir)
+	if err != nil {
+		if os.IsNotExist(err) {
+			return nil
+		}
+		return err
+	}
+
+	for _, entry := range entries {
+		if entry.IsDir() {
+			continue
+		}
+		name := entry.Name()
+		if strings.HasSuffix(name, "_rune.go") {
+			if err := os.Remove(filepath.Join(targetDir, name)); err != nil {
+				return err
+			}
+		}
+	}
+
+	return nil
 }
 
 func collectEnumsFromRuFiles(path string) ([]parser.Enum, error) {
@@ -253,7 +291,7 @@ func collectEnumsFromRuFiles(path string) ([]parser.Enum, error) {
 		}
 
 		entryPath := filepath.Join(path, entry.Name())
-		if filepath.Ext(entryPath) != ".ru" {
+		if filepath.Ext(entryPath) != runeFileExt {
 			continue
 		}
 
@@ -403,8 +441,8 @@ func parseGenerateTarget(target string) (generateTarget, error) {
 		return generateTarget{kind: generateTargetDir, path: target}, nil
 	}
 
-	if filepath.Ext(target) != ".ru" {
-		return generateTarget{}, fmt.Errorf("unsupported target %q (expected .ru file, directory, or path ending with /...)", target)
+	if filepath.Ext(target) != runeFileExt {
+		return generateTarget{}, fmt.Errorf("unsupported target %q (expected .rn file, directory, or path ending with /...)", target)
 	}
 
 	return generateTarget{kind: generateTargetFile, path: target}, nil
@@ -442,7 +480,7 @@ func generateDir(path string) error {
 			continue
 		}
 		entryPath := filepath.Join(path, entry.Name())
-		if filepath.Ext(entryPath) != ".ru" {
+		if filepath.Ext(entryPath) != runeFileExt {
 			continue
 		}
 		if err := transpile.File(entryPath); err != nil {
@@ -468,7 +506,7 @@ func walkForGenerate(root string) error {
 			}
 		}
 
-		if filepath.Ext(path) != ".ru" {
+		if filepath.Ext(path) != runeFileExt {
 			return nil
 		}
 

@@ -1,7 +1,6 @@
 name = "Rune"
 grammar = "go"
-path_suffixes = ["ru"]
+path_suffixes = ["rn"]
 line_comments = ["//", "#"]
 hard_tabs = false
 tab_size = 4
-

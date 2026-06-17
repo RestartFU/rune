@@ -633,7 +633,7 @@ func isRuneURI(uri string) bool {
 	if err != nil {
 		return false
 	}
-	return strings.HasSuffix(strings.ToLower(path), ".ru")
+	return strings.HasSuffix(strings.ToLower(path), ".rn")
 }
 
 func rewriteURIs(raw json.RawMessage, rewrite func(string) (string, bool)) (json.RawMessage, error) {

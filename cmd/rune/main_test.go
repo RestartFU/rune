@@ -11,7 +11,7 @@ import (
 func TestGenerateTargets_Table(t *testing.T) {
 	t.Run("direct file", func(t *testing.T) {
 		tmp := t.TempDir()
-		target := filepath.Join(tmp, "example.ru")
+		target := filepath.Join(tmp, "example.rn")
 		if err := os.WriteFile(target, []byte("package examples\n\ntype Example enum { Allow }"), 0o644); err != nil {
 			t.Fatal(err)
 		}
@@ -36,8 +36,8 @@ func TestGenerateTargets_Table(t *testing.T) {
 			t.Fatal(err)
 		}
 
-		rootInput := filepath.Join(root, "root.ru")
-		nestedInput := filepath.Join(nested, "nested.ru")
+		rootInput := filepath.Join(root, "root.rn")
+		nestedInput := filepath.Join(nested, "nested.rn")
 		if err := os.WriteFile(rootInput, []byte("package root\n\ntype R enum { A }"), 0o644); err != nil {
 			t.Fatal(err)
 		}
@@ -65,8 +65,8 @@ func TestGenerateTargets_Table(t *testing.T) {
 			t.Fatal(err)
 		}
 
-		rootInput := filepath.Join(root, "root.ru")
-		nestedInput := filepath.Join(nested, "nested.ru")
+		rootInput := filepath.Join(root, "root.rn")
+		nestedInput := filepath.Join(nested, "nested.rn")
 		if err := os.WriteFile(rootInput, []byte("package root\n\ntype R enum { A }"), 0o644); err != nil {
 			t.Fatal(err)
 		}
@@ -115,8 +115,8 @@ func TestRunCommand_DirectoryMain(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	enumPath := filepath.Join(tmp, "enum.ru")
-	mainPath := filepath.Join(tmp, "main.ru")
+	enumPath := filepath.Join(tmp, "enum.rn")
+	mainPath := filepath.Join(tmp, "main.rn")
 
 	if err := os.WriteFile(enumPath, []byte(`package main
 
@@ -171,13 +171,70 @@ func main() {
 	}
 }
 
+func TestRunCommand_CleansStaleGeneratedFiles(t *testing.T) {
+	tmp := t.TempDir()
+
+	if err := os.WriteFile(filepath.Join(tmp, "go.mod"), []byte("module example\n\ngo 1.22\n"), 0o644); err != nil {
+		t.Fatal(err)
+	}
+
+	mainPath := filepath.Join(tmp, "main.rn")
+	extraPath := filepath.Join(tmp, "extra.rn")
+
+	if err := os.WriteFile(mainPath, []byte(`package main
+
+import "fmt"
+
+type Example enum {
+	Main
+}
+
+func main() {
+	fmt.Println(Example.Main{})
+}`), 0o644); err != nil {
+		t.Fatal(err)
+	}
+
+	if err := os.WriteFile(extraPath, []byte(`package main
+
+type Extra enum {
+	Removed
+}`), 0o644); err != nil {
+		t.Fatal(err)
+	}
+
+	if err := runCommand([]string{tmp}); err != nil {
+		t.Fatalf("first runCommand(%q): %v", tmp, err)
+	}
+
+	extraGenerated := filepath.Join(tmp, "target", "extra_rune.go")
+	if _, err := os.Stat(extraGenerated); err != nil {
+		t.Fatalf("expected generated file before cleanup test: %v", err)
+	}
+
+	if err := os.Remove(extraPath); err != nil {
+		t.Fatal(err)
+	}
+
+	if err := runCommand([]string{tmp}); err != nil {
+		t.Fatalf("second runCommand(%q): %v", tmp, err)
+	}
+
+	if _, err := os.Stat(extraGenerated); !os.IsNotExist(err) {
+		if err == nil {
+			t.Fatalf("expected removed source to clear stale generated file: %s", extraGenerated)
+		}
+		t.Fatalf("unexpected error checking stale file: %v", err)
+	}
+}
+
 func TestRunCommand_NoMainError(t *testing.T) {
 	tmp := t.TempDir()
 	if err := os.WriteFile(filepath.Join(tmp, "go.mod"), []byte("module example\n\ngo 1.22\n"), 0o644); err != nil {
 		t.Fatal(err)
 	}
 
-	if err := os.WriteFile(filepath.Join(tmp, "main.ru"), []byte(`package main
+	if err := os.WriteFile(filepath.Join(tmp, "main.rn"), []byte(`package main
 
 type Example enum {
 	Deny
