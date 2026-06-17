@@ -9,6 +9,7 @@ repository = "https://github.com/restartfu/rune"
 [grammars.rune]
 repository = "https://github.com/restartfu/rune"
 path = "editors/tree-sitter-rune"
+rev = "f1430fd1dc99d886ebcdb9cc7193101bc1a9ea7d"
 
 [language_servers.rune-lsp]
 name = "Rune LSP"
