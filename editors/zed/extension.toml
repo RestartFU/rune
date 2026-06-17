@@ -1,0 +1,11 @@
+id = "rune-lsp"
+name = "Rune"
+description = "Rune language support powered by rune-lsp."
+version = "0.1.0"
+schema_version = 1
+authors = ["RestartFU"]
+repository = "https://github.com/restartfu/rune"
+
+[language_servers.rune-lsp]
+name = "Rune LSP"
+languages = ["Rune"]
