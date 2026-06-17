@@ -6,6 +6,10 @@ schema_version = 1
 authors = ["RestartFU"]
 repository = "https://github.com/restartfu/rune"
 
+[grammars.rune]
+repository = "https://github.com/restartfu/rune"
+path = "editors/tree-sitter-rune"
+
 [language_servers.rune-lsp]
 name = "Rune LSP"
 languages = ["Rune"]

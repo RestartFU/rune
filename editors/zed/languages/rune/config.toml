@@ -1,5 +1,5 @@
 name = "Rune"
-grammar = "go"
+grammar = "rune"
 path_suffixes = ["rn"]
 line_comments = ["//", "#"]
 hard_tabs = false
